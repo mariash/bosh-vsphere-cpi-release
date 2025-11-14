@@ -41,6 +41,14 @@ module LifecycleHelpers
     Bosh::Clouds::Config.configure(vsphere_config)
   end
 
+  def setup_locks_dir
+    @locks_dir = Dir.mktmpdir('vsphere-cpi-lifecycle-test-locks-dir')
+  end
+
+  def cleanup_locks_dir
+    FileUtils.rm_rf(@locks_dir)
+  end
+
   def fetch_boolean(key, default)
     value = ENV.fetch(key, default)
     value = false if value == "false"

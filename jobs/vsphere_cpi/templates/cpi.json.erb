@@ -149,6 +149,10 @@
     params["cloud"]["properties"]["plugins"] = plugin_hash
   end
 
+  if_p('locks_dir') do |locks_dir|
+    params["cloud"]["properties"]["locks_dir"] = locks_dir
+  end
+
   JSON.dump(params)
 
 %>

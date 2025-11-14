@@ -1776,7 +1776,7 @@ module VSphereCloud
         }
       end
       let(:cdrom) { instance_double(VimSdk::Vim::Vm::Device::VirtualCdrom) }
-
+      let(:locks_dir) { Dir.mktmpdir("vsphere-cpi-cloud-test") }
 
       before do
         allow(datacenter).to receive(:persistent_pattern).and_return(/datastore\-.*/)
@@ -1784,7 +1784,9 @@ module VSphereCloud
         allow(vm_provider).to receive(:find).with('fake-vm-cid').and_return(vm)
         allow(cdrom).to receive_message_chain(:backing, :datastore, :name) { 'datastore-with-disk' }
         allow(vcenter_client).to receive(:get_cdrom_device).with(vm_mob).and_return(cdrom)
+        allow(cloud_config).to receive(:locks_dir).and_return(locks_dir)
       end
+      after { FileUtils.rm_rf(locks_dir) }
 
       context 'when disk is in a datastore accessible to VM' do
         before do
@@ -2182,13 +2184,16 @@ module VSphereCloud
           }
         end
         let(:cdrom) { instance_double(VimSdk::Vim::Vm::Device::VirtualCdrom) }
+        let(:locks_dir) { Dir.mktmpdir("vsphere-cpi-cloud-test") }
         before do
           allow(datacenter).to receive(:disk_path).and_return("fake-disk-path")
           allow(cdrom).to receive_message_chain(:backing, :datastore, :name) { 'fake-datastore-name' }
           allow(vcenter_client).to receive(:get_cdrom_device).with(vm_mob).and_return(cdrom)
           allow(vm).to receive(:disk_by_cid).with('disk-cid').and_return(attached_disk)
           allow(vm).to receive(:accessible_datastores).and_return({'fake-datastore-name'=>fake_datastore})
+          allow(cloud_config).to receive(:locks_dir).and_return(locks_dir)
         end
+        after { FileUtils.rm_rf(locks_dir) }
 
         it 'updates VM with new settings' do
           expect(vm).to receive(:detach_disks).with([attached_disk], 'fake-disk-path')

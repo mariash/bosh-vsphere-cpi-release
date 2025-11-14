@@ -117,7 +117,8 @@ module LifecycleProperties
         'ntp' => ['10.80.0.44'],
       },
       'vcenters' => [vcenter_options],
-      'plugins' => plugins_overrides
+      'plugins' => plugins_overrides,
+      'locks_dir' => @locks_dir
     }
     if overrides['soap_log']
       opts['soap_log'] = overrides['soap_log']

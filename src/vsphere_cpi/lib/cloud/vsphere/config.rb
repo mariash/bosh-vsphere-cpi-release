@@ -284,6 +284,10 @@ module VSphereCloud
       config['plugins']
     end
 
+    def locks_dir
+      config['locks_dir']
+    end
+
     private
 
     attr_reader :config
@@ -346,7 +350,8 @@ module VSphereCloud
               )]
             }]
           }],
-          optional('plugins') => dict(String, Object)
+          optional('plugins') => dict(String, Object),
+          'locks_dir' => String
         }
       end
 

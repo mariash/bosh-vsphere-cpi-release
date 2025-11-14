@@ -1,0 +1,5 @@
+#!/bin/bash -eu
+
+LOCKS_DIR=<%= p('locks_dir') %>
+mkdir -p $LOCKS_DIR
+chown -R vcap:vcap $LOCKS_DIR

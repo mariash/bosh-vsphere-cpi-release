@@ -1,6 +1,7 @@
 ---
 name: vsphere_cpi
 templates:
+  pre-start.erb: bin/pre-start
   cpi.erb: bin/cpi
   cpi.json.erb: config/cpi.json
 
@@ -124,6 +125,9 @@ properties:
     description: Port that the nats server listens on
     default: 4222
 
+  locks_dir:
+    description: Path to the directory where vsphere CPI will create locks for VM operations
+    default: /var/vcap/data/vsphere_cpi/locks
   env.http_proxy:
     description: Http proxy to connect to cloud API's
   env.https_proxy:

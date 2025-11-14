@@ -97,10 +97,11 @@ describe 'cpi.json.erb' do
               'http_logging' => true,
               'ensure_no_ip_conflicts' => true,
               'vm_storage_policy_name' => 'VM Storage Policy',
-              "vmx_options"=>{},
+              "vmx_options" => {}
             }
           ],
-          'plugins' => {}
+          'plugins' => {},
+          'locks_dir' => '/var/vcap/data/vsphere_cpi/locks'
         }
       }
     })

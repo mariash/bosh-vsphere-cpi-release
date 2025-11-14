@@ -723,7 +723,10 @@ module VSphereCloud
           disk_to_attach = @datacenter.move_disk_to_datastore(disk_to_attach, destination_datastore)
         end
 
-        disk_spec = vm.attach_disk(disk_to_attach)
+        disk_spec = with_vm_lock(vm_cid) do
+          vm.reload
+          vm.attach_disk(disk_to_attach)
+        end
 
         # For VMs with multiple SCSI controllers, as is common in Kubernetes workers, it is mandatory that
         # disk.enableUUID is set in the VMX options / extra config of the VM to ensure that disk mounting can be
@@ -762,7 +765,9 @@ module VSphereCloud
         # TODO: Run post hooks before raise?
         raise Bosh::Clouds::DiskNotAttached.new(true), "Disk '#{director_disk_cid.value}' is not attached to VM '#{vm_cid}'" if disk.nil?
 
-        vm.detach_disks([disk], @datacenter.disk_path)
+        with_vm_lock(vm_cid) do
+          vm.detach_disks([disk], @datacenter.disk_path)
+        end
       end
       @plugin_registry.run_post_hooks(__method__, self)
     end
@@ -890,6 +895,7 @@ module VSphereCloud
     def cleanup
       @heartbeat_thread.terminate
       @client.logout
+      FileUtils.rm_rf(Dir.glob("#{@config.locks_dir}/*.lock"))
       rescue VSphereCloud::VCenterClient::NotLoggedInException
     end
 
@@ -918,6 +924,13 @@ module VSphereCloud
     end
 
     private
+
+    def with_vm_lock(vm_cid)
+      File.open(File.join(@config.locks_dir, vm_cid + '.lock'), 'w') do |f|
+        f.flock(File::LOCK_EX)
+        yield
+      end
+    end
 
     def add_to_policy_groups_and_server_pools(created_vm, vm_type, allow_missing_resources = false)
       ns_groups = vm_type.ns_groups.dup || []

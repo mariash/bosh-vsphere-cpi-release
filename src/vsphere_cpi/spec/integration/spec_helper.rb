@@ -12,6 +12,7 @@ RSpec.configure do |rspec_config|
   rspec_config.before(:suite) do
     setup_global_config
     fetch_global_properties
+    setup_locks_dir
 
     bosh_vsphere_stemcell_id = ENV.fetch('BOSH_VSPHERE_STEMCELL_ID', '')
     if bosh_vsphere_stemcell_id.empty?
@@ -34,6 +35,7 @@ RSpec.configure do |rspec_config|
   rspec_config.before(:all) do
     setup_global_config
     fetch_global_properties
+    setup_locks_dir
 
     @cpi = @lifecycle_cpi
     @stemcell_id = stemcell_id
@@ -41,15 +43,18 @@ RSpec.configure do |rspec_config|
 
   rspec_config.after(:all) do
     @cpi.cleanup
+    cleanup_locks_dir
   end
 
   rspec_config.after(:suite) do
     setup_global_config
     fetch_global_properties
+    setup_locks_dir
 
     if ENV.fetch('BOSH_VSPHERE_STEMCELL_ID', '').empty? && ENV.fetch('SKIP_STEMCELL_DELETION', '').empty?
       delete_stemcell(@lifecycle_cpi, stemcell_id)
     end
     @lifecycle_cpi.cleanup
+    cleanup_locks_dir
   end
 end
